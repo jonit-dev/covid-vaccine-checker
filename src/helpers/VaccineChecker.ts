@@ -50,7 +50,7 @@ export class VaccineChecker {
       const availableSlotPayload = {
         name: locationName,
         id: locationId,
-        appointmentUrl: "https://portal.healthmyself.net/walmartbc/#/",
+        appointmentUrl: "https://portal.healthmyself.net/walmartbc/forms/1eo",
         phone,
         address,
         createdAt: new Date(),
@@ -90,8 +90,10 @@ export class VaccineChecker {
       - Address: ${availablePlace.address}
       - Phone: ${availablePlace.phone}
 
-      PS: You should look for the EXACT location name using the form.
-      Sometimes the link doesn't work. Just keep trying.
+      READ ME: 
+      - You should look for the EXACT location name using the form.
+      - Sometimes the link doesn't work. Just keep trying.
+      - If you find our group helpful, please share https://t.me/bcvaccineappointments
       `
     );
   }

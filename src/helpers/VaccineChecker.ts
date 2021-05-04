@@ -82,9 +82,8 @@ export class VaccineChecker {
   }
 
   private async sendTelegramMessage(availablePlace: AvailablePlace) {
-    const telegramBotHelper = new TelegramBotHelper();
-
-    await telegramBotHelper.sendMessageToGroup(
+    const telegramBot = new TelegramBotHelper();
+    await telegramBot.sendMessageToGroup(
       `*** New Available Appointment Found ***
       - Name: ${availablePlace.name}
       - Url: ${availablePlace.appointmentUrl}

@@ -1,1 +1,1 @@
-export const TelegramBotID = -510111965;
+export const telegramBotGroupID = -510111965;

@@ -50,7 +50,7 @@ export class VaccineChecker {
       const availableSlotPayload = {
         name: locationName,
         id: locationId,
-        appointmentUrl: "https://portal.healthmyself.net/walmartbc",
+        appointmentUrl: "https://portal.healthmyself.net/walmartbc/forms/1eo",
         phone,
         address,
         createdAt: new Date(),

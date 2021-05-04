@@ -17,7 +17,7 @@ export const locations = {
   Langley: "1246",
   Victoria: "1245",
   "Surrey (E)": "1244",
-  Richmond: "1242",
+  "Richmond (N)": "1242",
   Nanaimo: "1232",
   "Vancouver (E)": "1229",
 };

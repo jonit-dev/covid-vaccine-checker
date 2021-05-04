@@ -89,6 +89,9 @@ export class VaccineChecker {
       - Url: ${availablePlace.appointmentUrl}
       - Address: ${availablePlace.address}
       - Phone: ${availablePlace.phone}
+
+      PS: You should look for the EXACT location name using the form.
+      Sometimes the link doesn't work. Just keep trying.
       `
     );
   }

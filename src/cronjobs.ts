@@ -1,3 +1,4 @@
+import axios from "axios";
 import cron from "node-cron";
 
 import { locations } from "./data/locations";
@@ -7,10 +8,17 @@ export class CronJobs {
   public schedule() {
     const vaccineChecker = new VaccineChecker();
 
-    console.log("Scheduling vaccine checks...");
+    console.log("Scheduling cron jobs");
 
     cron.schedule("* * * * *", () => {
       vaccineChecker.checkVaccine(locations);
+    });
+
+    cron.schedule("*/10 * * * *", () => {
+      axios.get("https://joao-vaccine-checker.herokuapp.com/");
+      console.log(
+        "Pinged https://joao-vaccine-checker.herokuapp.com/ to prevent idle dyno!"
+      );
     });
   }
 }

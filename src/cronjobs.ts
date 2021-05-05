@@ -14,11 +14,17 @@ export class CronJobs {
       vaccineChecker.checkVaccine(locations);
     });
 
-    cron.schedule("*/10 * * * *", () => {
-      axios.get("https://joao-vaccine-checker.herokuapp.com/");
+    cron.schedule("*/10 * * * *", async () => {
+      const response = await axios.get(
+        "https://joao-vaccine-checker.herokuapp.com/"
+      );
       console.log(
         "Pinged https://joao-vaccine-checker.herokuapp.com/ to prevent idle dyno!"
       );
+
+      if (response.status === 200) {
+        console.log("Refreshed!");
+      }
     });
   }
 }

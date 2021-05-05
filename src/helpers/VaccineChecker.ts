@@ -53,7 +53,7 @@ export class VaccineChecker {
         appointmentUrl: "https://portal.healthmyself.net/walmartbc/forms/1eo",
         phone,
         address,
-        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       // if its not added yet...
@@ -68,7 +68,7 @@ export class VaccineChecker {
         const now = dayjs(new Date());
 
         const lastAppointmentEntry = dayjs(
-          VaccineChecker.availablePlacesList[placeIndex].createdAt
+          VaccineChecker.availablePlacesList[placeIndex].updatedAt
         );
 
         const diff = now.diff(lastAppointmentEntry, "hours");
@@ -76,6 +76,7 @@ export class VaccineChecker {
         // if there's already 6 hours since last warning...
         if (diff > 3) {
           await this.sendTelegramMessage(availableSlotPayload);
+          VaccineChecker.availablePlacesList[placeIndex].updatedAt = new Date(); // update last update timestamp
         }
       }
     }
@@ -92,7 +93,7 @@ export class VaccineChecker {
 
       READ ME: 
       - You should look for the EXACT location name using the form.
-      - Sometimes the link doesn't work. Just keep trying.
+      - ** Sometimes the link doesn't work. Just keep trying. You should be quick! 💨
       - If you find our group helpful, please share https://t.me/bcvaccineappointments
       `
     );

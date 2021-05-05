@@ -4,7 +4,7 @@ export interface AvailablePlace {
   appointmentUrl: string;
   phone: string;
   address: string;
-  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface AvailablePlaceResponse {

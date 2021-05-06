@@ -8,6 +8,12 @@ import { GenericHelper } from "./GenericHelper";
 import { TelegramBotHelper } from "./TelegramBotHelper";
 
 export class VaccineChecker {
+  public telegramHelper: TelegramBotHelper;
+
+  constructor() {
+    this.telegramHelper = new TelegramBotHelper();
+  }
+
   private static availablePlacesList: IAvailablePlace[] = [];
 
   private async walmartRequest(
@@ -99,7 +105,7 @@ export class VaccineChecker {
       }
 
       if (messageToPrint.length > 0) {
-        await TelegramBotHelper.sendMessage(messageToPrint);
+        await this.telegramHelper.sendMessage(messageToPrint);
       }
     } else {
       console.log("Hmm... nothing found available on shoppers yet!");
@@ -165,7 +171,7 @@ export class VaccineChecker {
   }
 
   private async sendTelegramMessage(availablePlace: IAvailablePlace) {
-    await TelegramBotHelper.sendMessageWalmart(availablePlace);
+    await this.telegramHelper.sendMessageWalmart(availablePlace);
   }
 
   private async isAppointmentAvailableAtLocation(

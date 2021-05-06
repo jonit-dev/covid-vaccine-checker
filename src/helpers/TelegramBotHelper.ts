@@ -1,12 +1,18 @@
+import TelegramBot from "node-telegram-bot-api";
+
 import { telegramBot } from "../app";
 import { telegramBotGroupID } from "../constants/TelegramConstants";
 import { IAvailablePlace } from "../types/LocationTypes";
 
 export class TelegramBotHelper {
-  public static bot = telegramBot;
+  bot: TelegramBot;
 
-  public static async sendMessageWalmart(availablePlace: IAvailablePlace) {
-    await TelegramBotHelper.bot.sendMessage(
+  constructor() {
+    this.bot = telegramBot;
+  }
+
+  public async sendMessageWalmart(availablePlace: IAvailablePlace) {
+    await this.bot.sendMessage(
       telegramBotGroupID,
       `*** New Available Appointment Found ***
     - Name: ${availablePlace.name}
@@ -22,7 +28,7 @@ export class TelegramBotHelper {
     );
   }
 
-  public static async sendMessage(message: string) {
-    await TelegramBotHelper.bot.sendMessage(telegramBotGroupID, message);
+  public async sendMessage(message: string) {
+    await this.bot.sendMessage(telegramBotGroupID, message);
   }
 }

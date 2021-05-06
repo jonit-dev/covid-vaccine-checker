@@ -1,16 +1,16 @@
-import { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import dayjs from "dayjs";
 
-import { telegramBot } from "../app";
-import { WALMART_BOOKING } from "../constants/AxiosConstants";
-import { telegramBotGroupID } from "../constants/TelegramConstants";
-import { cookie } from "../data/cookie";
-import { AvailablePlace, AvailablePlaceResponse } from "../types/LocationTypes";
+import { SHOPPERS_VACCINES, WALMART_BOOKING } from "../constants/AxiosConstants";
+import { shoppersDrugmartCookie, walmartCookie } from "../data/cookie";
+import { IAvailablePlace, IAvailablePlaceResponse, IShoppersDrugmartResponse } from "../types/LocationTypes";
+import { GenericHelper } from "./GenericHelper";
+import { TelegramBotHelper } from "./TelegramBotHelper";
 
 export class VaccineChecker {
-  private static availablePlacesList: AvailablePlace[] = [];
+  private static availablePlacesList: IAvailablePlace[] = [];
 
-  private async request(
+  private async walmartRequest(
     url: string,
     method: AxiosRequestConfig["method"],
     data?: object
@@ -20,12 +20,93 @@ export class VaccineChecker {
       method,
       data,
       headers: {
-        Cookie: cookie,
+        Cookie: walmartCookie,
       },
     });
   }
 
-  public async checkVaccine(locations: object) {
+  private async shoppersRequest(
+    url: string,
+    method: AxiosRequestConfig["method"],
+    data?: object
+  ) {
+    return await SHOPPERS_VACCINES.request({
+      url,
+      method,
+      data,
+
+      headers: {
+        accept: "*/*",
+        "accept-language": "en-US,en;q=0.9,la;q=0.8",
+        "sec-ch-ua":
+          '" Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "x-newrelic-id": "UwEFUF5XGwQHUFJUDwY=",
+        "x-requested-with": "XMLHttpRequest",
+        cookie: shoppersDrugmartCookie,
+      },
+    });
+  }
+
+  public async checkShoppersVaccine(): Promise<void> {
+    let results: IShoppersDrugmartResponse[] = [];
+
+    const response = await this.shoppersRequest(
+      "/en/store/getstores?latitude=49.225787&longitude=-122.9975122&radius=500&unit=km&lookup=nearby&filters=RSV-CVW%3ATRUE%2CRSV-COV%3ATRUE&rpp=4&isCovidShotSearch=true&getCovidShotAvailability=true",
+      "GET"
+    );
+
+    if (response.data) {
+      results = [...results, ...response.data.results];
+
+      let nextUrlData = response.data.next;
+      let nextUrl = `/en/store/getstores?${nextUrlData}`;
+      let maxPages = 50;
+      let i = 0;
+
+      while (nextUrlData && i < maxPages) {
+        const newResponse = await this.shoppersRequest(nextUrl, "GET");
+
+        results = [...results, ...newResponse.data.results];
+
+        nextUrlData = newResponse.data.next;
+        nextUrl = `/en/store/getstores?${nextUrlData}`;
+
+        await GenericHelper.sleep(2000);
+
+        i++;
+      }
+    }
+
+    const availablePlaces: IShoppersDrugmartResponse[] = results.filter(
+      (result) => result.FlusShotAvailableNow === true
+    );
+
+    if (availablePlaces.length > 0) {
+      let messageToPrint = ``;
+
+      for (const availablePlace of availablePlaces) {
+        messageToPrint += `
+        *** Check availability of COVID Vaccine on ShoppersDrugmart ${availablePlace.name} ***
+        - Phone: ${availablePlace.phone}
+        - City: ${availablePlace.city}
+        - Address: ${availablePlace.address}
+        - Postal Code: ${availablePlace.postalCode}
+        `;
+      }
+
+      if (messageToPrint.length > 0) {
+        await TelegramBotHelper.sendMessage(messageToPrint);
+      }
+    } else {
+      console.log("Hmm... nothing found available on shoppers yet!");
+    }
+  }
+
+  public async checkWalmartVaccine(locations: object) {
     for (const [locationName, locationId] of Object.entries(locations)) {
       const response = await this.isAppointmentAvailableAtLocation(
         locationName,
@@ -36,7 +117,7 @@ export class VaccineChecker {
         continue;
       }
 
-      const { address, phone }: AvailablePlaceResponse = response;
+      const { address, phone }: IAvailablePlaceResponse = response;
 
       console.log(
         `${locationName} (${locationId}) - ${address} is available! ✅`
@@ -83,29 +164,16 @@ export class VaccineChecker {
     }
   }
 
-  private async sendTelegramMessage(availablePlace: AvailablePlace) {
-    await telegramBot.sendMessage(
-      telegramBotGroupID,
-      `*** New Available Appointment Found ***
-    - Name: ${availablePlace.name}
-    - Url: ${availablePlace.appointmentUrl}
-    - Address: ${availablePlace.address}
-    - Phone: ${availablePlace.phone}
-
-    READ ME: 
-    - You should look for the EXACT location name using the form.
-    - ** Sometimes the link doesn't work. Just keep trying. You should be quick! 💨
-    - If you find our group helpful, please share https://t.me/bcvaccineappointments
-    `
-    );
+  private async sendTelegramMessage(availablePlace: IAvailablePlace) {
+    await TelegramBotHelper.sendMessageWalmart(availablePlace);
   }
 
   private async isAppointmentAvailableAtLocation(
     locationName: string,
     locationId: string
-  ): Promise<AvailablePlaceResponse | undefined> {
+  ): Promise<IAvailablePlaceResponse | undefined> {
     try {
-      const response = await this.request(
+      const response = await this.walmartRequest(
         `/walmartbc/guest/booking/4788/schedules\?locId\=${locationId}`,
         "GET"
       );

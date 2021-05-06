@@ -26,5 +26,9 @@ export class CronJobs {
         console.log("Refreshed!");
       }
     });
+
+    cron.schedule("0 */3 * * *", () => {
+      vaccineChecker.checkVaccine(locations);
+    });
   }
 }

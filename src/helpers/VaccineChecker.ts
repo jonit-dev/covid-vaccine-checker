@@ -1,10 +1,11 @@
 import { AxiosRequestConfig } from "axios";
 import dayjs from "dayjs";
 
+import { telegramBot } from "../app";
 import { WALMART_BOOKING } from "../constants/AxiosConstants";
+import { telegramBotGroupID } from "../constants/TelegramConstants";
 import { cookie } from "../data/cookie";
 import { AvailablePlace, AvailablePlaceResponse } from "../types/LocationTypes";
-import { TelegramBotHelper } from "./TelegramBot";
 
 export class VaccineChecker {
   private static availablePlacesList: AvailablePlace[] = [];
@@ -83,19 +84,19 @@ export class VaccineChecker {
   }
 
   private async sendTelegramMessage(availablePlace: AvailablePlace) {
-    const telegramBot = new TelegramBotHelper();
-    await telegramBot.sendMessageToGroup(
+    await telegramBot.sendMessage(
+      telegramBotGroupID,
       `*** New Available Appointment Found ***
-      - Name: ${availablePlace.name}
-      - Url: ${availablePlace.appointmentUrl}
-      - Address: ${availablePlace.address}
-      - Phone: ${availablePlace.phone}
+    - Name: ${availablePlace.name}
+    - Url: ${availablePlace.appointmentUrl}
+    - Address: ${availablePlace.address}
+    - Phone: ${availablePlace.phone}
 
-      READ ME: 
-      - You should look for the EXACT location name using the form.
-      - ** Sometimes the link doesn't work. Just keep trying. You should be quick! 💨
-      - If you find our group helpful, please share https://t.me/bcvaccineappointments
-      `
+    READ ME: 
+    - You should look for the EXACT location name using the form.
+    - ** Sometimes the link doesn't work. Just keep trying. You should be quick! 💨
+    - If you find our group helpful, please share https://t.me/bcvaccineappointments
+    `
     );
   }
 
